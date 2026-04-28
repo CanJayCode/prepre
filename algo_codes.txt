@@ -1,0 +1,1084 @@
+ALGORITHM CODE COLLECTION
+
+============================================================
+1) BST - a1.cpp
+============================================================
+#include <iostream>
+#include <queue>
+using namespace std;
+
+struct Node
+{
+    int data;
+    Node *left, *right;
+    
+    Node(int x) {
+        data = x;
+        left = right = NULL ;
+    }
+};
+
+class BST
+{
+public:
+    Node *root = NULL;
+    
+    Node* insert(Node *root, int x) {
+        if(root == NULL)
+            return new Node(x);
+        
+        if(x < root->data)
+            root->left = insert(root->left, x);
+        else if(x > root->data)
+            root->right = insert(root->right, x);
+        
+        return root;
+    }
+    
+    void add(int x) {
+        root = insert(root, x);
+    }
+    
+    Node* search(Node *root, int x) {
+        while(root != NULL) {
+            if(x == root->data)
+                return root;
+            if(x < root->data)
+                root = root->left;
+            else
+                root = root->right;
+        }
+        return NULL;
+    }
+    
+    Node* findMin(Node *root) {
+        while(root->left != NULL)
+            root = root->left;
+        return root;
+    }
+    
+   Node *deletenode(Node *root, int x){
+        if(root == NULL){
+            cout<<"Nothing to delete";
+            return;
+        }
+        if(x<root->data){
+            root->left = deletenode(root->left, x);
+        }
+        else if(x>root->data){
+            root->right = deletenode(root->right, x);
+        }
+        else{
+            if(root->left == NULL){
+                Node *temp = root->right;
+                delete root;
+                return temp;
+            }
+            else if (root->right == NULL){
+                Node *temp = root->left;
+                delete root;
+                return temp;
+        }
+        Node *minnnode = findMin(root->right);
+        root->data = minnnode->data;
+        root->right = deletenode(root->right, minnnode->data);
+
+        }
+        
+        return root;
+
+   }
+   void remove(int x){
+    root = deletenode(root, x);
+   }
+
+
+    
+    void remove(int x) {
+        root = deletenode(root, x);
+    }
+    
+    void inorder(Node *root) {
+        if(root != NULL) {
+            inorder(root->left);
+            cout << root->data << " ";
+            inorder(root->right);
+        }
+    }
+    
+    void display() {
+        inorder(root);
+        cout << endl;
+    }
+};
+
+int main() {
+    BST bst;
+    int ch, x;
+    
+    do {
+        cout << "\n1.Insert 2.Search 3.Delete 4.Display 0.Exit\nChoice: ";
+        cin >> ch;
+        
+        switch(ch) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> x;
+                bst.add(x);
+                break;
+            case 2:
+                cout << "Enter value: ";
+                cin >> x;
+                if(bst.search(bst.root, x))
+                    cout << "Found\n";
+                else
+                    cout << "Not found\n";
+                break;
+            case 3:
+                cout << "Enter value: ";
+                cin >> x;
+                bst.remove(x);
+                break;
+            case 4:
+                cout << "Inorder: ";
+                bst.display();
+                break;
+        }
+    } while(ch != 0);
+    
+    return 0;
+}
+
+============================================================
+2) AVL TREE - a2.cpp
+============================================================
+#include<iostream>
+#include<string>
+using namespace std;
+
+struct Node{
+    int height;
+    int key;
+    Node *left; Node *right;
+
+    Node(int k){
+        key = k;
+        height = 1;
+        left = right = NULL;
+    }
+
+};
+
+class avl{
+
+    Node *root = NULL;
+
+    int h(Node *n){
+        if(n == NULL){
+            return 0;
+        }
+        return n->height;
+    }
+
+    int balance(Node *n){
+        if(n == NULL){
+            return 0;
+        }
+        return(h(n->left) - h(n->right));
+    }
+
+    int max(int a, int b){
+        if(a > b){
+            return a;
+        }
+        else return b;
+
+    }
+
+
+    Node *rotateleft(Node *x){
+        Node *y = x-> right;
+        x->right = y->left;
+        y->left = x;
+
+        x->height = max(h(x->left), h(x->right)) +1;
+        y->height = max(h(y->left), h(y->right)) +1;
+
+        return y;
+
+    }
+     Node *rotateright(Node *y){
+        Node *x = y->left;
+        y->left = x->right;
+        x->right = y;
+
+        y->height = max(h(y->left), h(y->right)) +1;
+        x->height = max(h(x->left), h(x->right)) +1;
+        
+
+        return x;
+    }
+
+    Node *insert(Node *root, int key){
+        if(root == NULL){
+            return new Node(key);
+        }
+        if(key < root->key){
+            root->left = insert(root->left, key);
+        }
+        else if(key > root->key){
+            root->right  = insert(root->right, key);
+        }
+        else{
+            return root;
+
+        }
+        root->height = max(h(root->left), h(root->right)) +1;
+        int bf = balance(root);
+
+
+        //LL
+        if(bf>1 && key < root->left->key){
+            return rotateright(root);
+        }
+        //RR
+        if(bf<-1 && key > root->right->key){
+            return rotateleft(root);
+        }
+        //LR
+        if(bf> 1 && key > root->left->key){
+            root->left = rotateleft(root->left);
+            return rotateright(root);
+        }
+        //RL
+        if(bf< -1 && key < root->right->key){
+            root->right = rotateright(root->right);
+            return rotateleft(root);   
+        } 
+    }
+    void add(int data){
+            root = insert(root, data);
+    }
+
+    Node *minnode(Node *root){
+        while(root->left != NULL){
+            root = root->left;
+        }
+        return root;
+    }
+
+    Node *remove(Node *root, int key){
+        if(root == NULL){
+            return root;
+
+        }
+        if(key < root->key){
+            root->left = remove(root->left, key);
+        }
+        else if(key > root->key){
+            root->right = remove(root->right, key);
+        }
+        else{
+            if (root->left == NULL || root->right == NULL){
+                Node *temp  = root->left ? root->left : root->right;
+                if(temp == NULL){
+                    temp = root;
+                    root = NULL;
+                }
+                else *root = *temp;
+                delete temp;
+            }
+
+            else{
+                Node *temp = minnode(root->right);
+                root->key = temp->key;
+                root->right = remove(root->right, temp->key);
+            }
+            }
+        
+        if(root == NULL){
+            return root; 
+        }
+        root->height = 1 + max(h(root->left),h(root->right));
+        int bf = balance(root);
+
+         //LL
+        if(bf>1 && balance(root->left) >=0){
+            return rotateright(root);
+        }
+        //RR
+        if(bf<-1 && balance(root->right) <= 0){
+            return rotateleft(root);
+        }
+        //LR
+        if(bf> 1 && balance(root->left)<0){
+            root->left = rotateleft(root->left);
+            return rotateright(root);
+        }
+        //RL
+        if(bf< -1 && balance(root->right) >0){
+            root->right = rotateright(root->right);
+            return rotateleft(root);   
+        } 
+        return root;
+
+        
+
+    }
+    void del(int key){
+        root = remove(root, key);
+            
+    }
+    void show(Node *root)
+    {
+        if(root!=NULL)
+        {
+            show(root->right);
+            cout<<"KEY:"<<root->key<<endl;
+            show(root->left);
+        }
+    }
+
+
+
+
+};
+
+============================================================
+3) MAZE DFS/BFS - a3.cpp
+============================================================
+#include<iostream>
+#include<string>
+#include<queue>
+using namespace std;
+
+class maze{
+    public:
+    int grid[10][10];
+    int visited[10][10];
+
+    int n,m;
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
+
+    void createmaze(){
+
+        cout<<"Enter the rows and coloumns";
+        cin>>n>>m;
+
+        for(int i = 0; i<n; i++){
+            for(int j = 0; j<m; j++){
+                cin>>grid[i][j];
+            }
+        }
+    }
+
+    void reset(){
+         for(int i = 0; i<n; i++){
+            for(int j = 0; j<m; j++){
+                visited[i][j] = 0;
+            }
+        }
+    }
+
+
+    bool isvalid(int x, int y){
+        return(x>=0 && y>=0 && x<n && y<m && 
+        visited[x][y] == 0 && grid[x][y] == 0);
+    }
+
+    bool dfs(int x, int y, int gx, int gy){
+        if(x == gx && y== gy){
+            cout<<"Goal is reached";
+            return true;
+        }
+
+        visited[x][y] =1;
+
+        for(int i = 0; i<4; i++){
+
+            int nx = x+dx[i];
+            int ny = x+dy[i];
+
+            if(isvalid(nx, ny)){
+                if(dfs(nx, ny, gx, gy)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void bfs(int sx, int sy, int gx, gy){
+        queue<pair<int, int>>q; 
+
+        q.push({sx,sy});
+        reset();
+        visited[sx][sy] =1;
+
+        while(!q.empty()){
+            pair<int, int> p = q.front();
+            q.pop();
+
+            int x = p.first();
+            int y = p.second();
+            if(x == gx &&  y == gy){
+                cout<<"We found the goal";
+                return;
+            }
+
+            for(int i = 0; i<4; i++){
+
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                if(isvalid(nx, ny)){
+
+                    visited[nx][ny] =1;
+                    q.push({nx,ny});
+                    
+                }
+            }
+        }
+        cout<<"No path found";
+    }
+};
+
+
+int main(){
+    maze m;
+
+    int ch;
+    int sx, sy, gx, gy;
+
+    do
+    {
+        cout<<"\n 1. Create a maze";
+        cout<<"\n 2. bfs";
+        cout<<"\n 3. dfs";
+        cout<<"\n 0. Exit";
+        cin>>ch;
+
+        switch (ch)
+        {
+        case 1:
+        m.createmaze();
+        break;
+    
+        case 2:
+        cout<<"Enter start (sx sy)";
+        cin>>sx>>sy;
+        cout<<"Enter end (gx gy)";
+        cin>>gx,gy;
+        m.bfs(sx,sy,gx,gy);
+        break;
+    
+        case 3:
+        cout<<"Enter start (sx sy)";
+        cin>>sx>>sy;
+        cout<<"Enter end (gx gy)";
+        cin>>gx,gy;
+        
+        m.reset();
+
+                if(!m.dfs(sx,sy,gx,gy))
+                    cout<<"No path found using DFS\n";
+                
+        break;
+            }    }
+
+ while (ch!= 0);
+    
+    return 0;
+    
+}
+
+============================================================
+4) PRIM'S ALGORITHM - a4.cpp
+============================================================
+#include <iostream>
+using namespace std;
+
+int minkey(int key[],bool mstset[], int V){
+    
+    int min = 999;
+    int index = 0;
+    for(int i = 0; i< V; i++){
+        if(mstset[i] == false && key[i]<min){
+            min = key[i];
+            index = i;
+        }
+    }
+     
+    return index;
+}
+
+int print(int parent[], int graph[10][10], int V){
+
+    int total = 0;
+    for(int i = 1; i<V; i++){
+        cout<<parent[i]<<" - "<< i<<" = "<<graph[i][parent[i]];
+        total = total + graph[i][parent[i]];
+    }
+
+    
+
+}
+
+void prim(int graph[10][10], int V){
+
+    int key[10];
+    bool mstset[10];
+    int parent[10];
+
+    for(int i = 0; i<V; i++ ){
+        key[i] = 999;
+        mstset[i] = false;
+    }
+
+    key[0] = 0;
+    parent[0] = -1;
+
+    for(int i = 0; i<V; i++){
+        int u = minkey(key, mstset, V);
+        mstset[u] = true;
+
+        for(int v = 0; v<V; v++ ){
+
+            if(graph[u][v] != 0 &&
+            mstset[v] == false &&
+            graph[u][v]< key[v])
+            {   
+                parent[v] = u;
+                key[v] = graph[u][v];
+                
+            }
+        }
+    }
+    print(parent, graph,V);
+}
+
+int main(){
+    int graph[10][10];
+    int V;
+    
+    cout<<"Enter no of vertices";
+    cin>>V;
+
+    for(int i = 0; i< V; i++){
+        for(int j = 0; j<V; j++){
+
+            cin>>graph[i][j];
+        }
+    }
+
+    prim(graph, V);
+    return 0;
+
+    
+
+}
+
+============================================================
+5) DIJKSTRA'S ALGORITHM - a5.cpp
+============================================================
+#include<iostream>
+#include<string>
+using namespace std;
+
+int minkey(int key[], bool mstset[], int V){
+    int min = 999;
+    int index = 0;
+    for(int i = 0 ; i<V; i++){
+
+        if(mstset[i] == false && key[i]< min){
+            index = i;
+            min = key[i];
+        }
+    }
+    return index;
+}
+
+void print(int key[],int V){
+    cout<<"Vertex\t Distance from src\n";
+    for(int i = 0; i<V; i++){
+        cout<<i<<"\t\t"<<key[i]<< endl;
+
+    }
+}
+void djkstras(int graph[10][10],int V ){
+    int key[10];
+    bool mstset[10];
+
+    for(int i = 0; i<V; i++){
+        key[i] = 999;
+        mstset[i] = false;
+    }
+    key[0] = 0;
+
+    for(int i = 0; i<V-1; i++){
+        int u = minkey(key, mstset, V);
+        mstset[u] = true;
+
+        for(int v = 0; v<V; v++){
+            if(graph[u][v] != 0 &&
+            mstset[v] == false &&
+            key[u]+ graph[u][v] < key[v]){
+                key[v] = key[u]+ graph[u][v];
+            }
+            
+        }
+    }
+    print(key, V);
+
+    
+}
+
+int main(){
+int graph[10][10];
+    int V;
+    
+    cout<<"Enter no of vertices";
+    cin>>V;
+
+    for(int i = 0; i< V; i++){
+        for(int j = 0; j<V; j++){
+
+            cin>>graph[i][j];
+        }
+    }
+
+    djkstras(graph, V);
+    return 0;
+}
+
+============================================================
+6) BFS/DFS GRAPH TRAVERSAL - bdfs
+============================================================
+#include<iostream>
+#include<queue>
+using namespace std;
+
+class Graph
+{
+public:
+    int graph[10][10];
+    int visited[10];
+    int n;
+
+    // create graph
+    void createGraph()
+    {
+        cout<<"Enter number of vertices: ";
+        cin>>n;
+
+        cout<<"Enter adjacency matrix:\n";
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < n; j++)
+            {
+                cin>>graph[i][j];
+            }
+        }
+    }
+
+    // reset visited
+    void reset()
+    {
+        for(int i = 0; i < n; i++)
+            visited[i] = 0;
+    }
+
+    // DFS (recursive)
+    bool dfs(int node, int goal)
+    {
+        cout<<node<<" ";
+        visited[node] = 1;
+
+        if(node == goal)
+        {
+            cout<<"\nGoal reached using DFS\n";
+            return true;
+        }
+
+        for(int i = 0; i < n; i++)
+        {
+            if(graph[node][i] == 1 && visited[i] == 0)
+            {
+                if(dfs(i, goal))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    // BFS
+    void bfs(int start, int goal)
+    {
+        queue<int> q;
+
+        reset();
+        q.push(start);
+        visited[start] = 1;
+
+        while(!q.empty())
+        {
+            int node = q.front();
+            q.pop();
+
+            cout<<node<<" ";
+
+            if(node == goal)
+            {
+                cout<<"\nGoal reached using BFS\n";
+                return;
+            }
+
+            for(int i = 0; i < n; i++)
+            {
+                if(graph[node][i] == 1 && visited[i] == 0)
+                {
+                    visited[i] = 1;
+                    q.push(i);
+                }
+            }
+        }
+
+        cout<<"\nNo path found using BFS\n";
+    }
+};
+
+int main()
+{
+    Graph g;
+    int ch, start, goal;
+
+    do
+    {
+        cout<<"\n1. Create Graph";
+        cout<<"\n2. BFS";
+        cout<<"\n3. DFS";
+        cout<<"\n0. Exit";
+        cout<<"\nEnter choice: ";
+        cin>>ch;
+
+        switch(ch)
+        {
+            case 1:
+                g.createGraph();
+                break;
+
+            case 2:
+                cout<<"Enter start node: ";
+                cin>>start;
+                cout<<"Enter goal node: ";
+                cin>>goal;
+                g.bfs(start, goal);
+                break;
+
+            case 3:
+                cout<<"Enter start node: ";
+                cin>>start;
+                cout<<"Enter goal node: ";
+                cin>>goal;
+
+                g.reset();
+
+                if(!g.dfs(start, goal))
+                    cout<<"\nNo path found using DFS\n";
+                break;
+        }
+
+    } while(ch != 0);
+
+    return 0;
+}
+
+============================================================
+7) RED-BLACK TREE DIRECTORY STRUCTURE - check_A6B.cpp
+============================================================
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+    string dir;
+    bool color;
+    Node *left,*right,*parent;
+
+    Node(string d)
+    {
+        dir = d;
+        color = 1;
+        left = right = parent = NULL;
+    }
+};
+
+class RBTree
+{
+public:
+    Node *root = NULL;
+
+    void rotateLeft(Node *&root,Node *&pt)
+    {
+        Node *pt_right = pt->right;
+
+        pt->right = pt_right->left;
+
+        if(pt->right != NULL)
+            pt->right->parent = pt;
+
+        pt_right->parent = pt->parent;
+
+        if(pt->parent == NULL)
+            root = pt_right;
+
+        else if(pt == pt->parent->left)
+            pt->parent->left = pt_right;
+
+        else
+            pt->parent->right = pt_right;
+
+        pt_right->left = pt;
+        pt->parent = pt_right;
+    }
+
+    void rotateRight(Node *&root,Node *&pt)
+    {
+        Node *pt_left = pt->left;
+
+        pt->left = pt_left->right;
+
+        if(pt->left != NULL)
+            pt->left->parent = pt;
+
+        pt_left->parent = pt->parent;
+
+        if(pt->parent == NULL)
+            root = pt_left;
+
+        else if(pt == pt->parent->left)
+            pt->parent->left = pt_left;
+
+        else
+            pt->parent->right = pt_left;
+
+        pt_left->right = pt;
+        pt->parent = pt_left;
+    }
+
+    void fixInsert(Node *&root,Node *&pt)
+    {
+        Node *parent_pt = NULL;
+        Node *grand_pt = NULL;
+
+        while((pt != root) && (pt->color != 0) &&
+              (pt->parent->color == 1))
+        {
+            parent_pt = pt->parent;
+            grand_pt = pt->parent->parent;
+
+            if(parent_pt == grand_pt->left)
+            {
+                Node *uncle = grand_pt->right;
+
+                if(uncle != NULL && uncle->color == 1)
+                {
+                    grand_pt->color = 1;
+                    parent_pt->color = 0;
+                    uncle->color = 0;
+                    pt = grand_pt;
+                }
+                else
+                {
+                    if(pt == parent_pt->right)
+                    {
+                        rotateLeft(root,parent_pt);
+                        pt = parent_pt;
+                        parent_pt = pt->parent;
+                    }
+
+                    rotateRight(root,grand_pt);
+                    swap(parent_pt->color,grand_pt->color);
+                    pt = parent_pt;
+                }
+            }
+            else
+            {
+                Node *uncle = grand_pt->left;
+
+                if(uncle != NULL && uncle->color == 1)
+                {
+                    grand_pt->color = 1;
+                    parent_pt->color = 0;
+                    uncle->color = 0;
+                    pt = grand_pt;
+                }
+                else
+                {
+                    if(pt == parent_pt->left)
+                    {
+                        rotateRight(root,parent_pt);
+                        pt = parent_pt;
+                        parent_pt = pt->parent;
+                    }
+
+                    rotateLeft(root,grand_pt);
+                    swap(parent_pt->color,grand_pt->color);
+                    pt = parent_pt;
+                }
+            }
+        }
+
+        root->color = 0;
+    }
+
+    Node* BSTinsert(Node *root,Node *pt)
+    {
+        if(root==NULL)
+            return pt;
+
+        if(pt->dir < root->dir)
+        {
+            root->left = BSTinsert(root->left,pt);
+            root->left->parent = root;
+        }
+        else
+        {
+            root->right = BSTinsert(root->right,pt);
+            root->right->parent = root;
+        }
+
+        return root;
+    }
+
+    void insert(string dir)
+    {
+        Node *pt = new Node(dir);
+
+        root = BSTinsert(root,pt);
+
+        fixInsert(root,pt);
+    }
+
+    void inorder(Node *root)
+    {
+        if(root!=NULL)
+        {
+            inorder(root->left);
+            cout<<root->dir<<" ("<<(root->color?"R":"B")<<")\n";
+            inorder(root->right);
+        }
+    }
+
+    void display()
+    {
+        inorder(root);
+    }
+};
+
+int main()
+{
+    RBTree fs;
+    int ch;
+    string dir;
+
+    do
+    {
+        cout<<"\n1.Add Directory\n2.Display Structure\n0.Exit";
+        cout<<"\nEnter choice: ";
+        cin>>ch;
+
+        switch(ch)
+        {
+            case 1:
+                cout<<"Enter directory name: ";
+                cin>>dir;
+                fs.insert(dir);
+                break;
+
+            case 2:
+                cout<<"\nDirectory Structure:\n";
+                fs.display();
+                break;
+        }
+
+    }while(ch!=0);
+
+    return 0;
+}
+
+============================================================
+8) HEAP - heap.cpp
+============================================================
+#include<iostream>
+using namespace std;
+#include<string>
+#include<algorithm>
+
+
+class heap{
+    public: 
+
+    int arr[50];
+    int size = 0;
+    int type;
+
+    bool compare(int parent, int child){
+        if(type == 1){ 
+            return parent > child;
+        }
+        else {
+            return parent < child;
+        }
+
+    }
+
+    void insert(int value){
+         arr[size] = value;
+        int i = size;
+        size++;
+
+        while (i != 0){
+            int parent = (i-1)/2;
+            if(compare(arr[parent], arr[i])){
+                swap(arr[parent], arr[i]);
+                i = parent;
+            }
+            else break;
+        }
+
+        
+
+    }
+    void deleteroot(){
+        if(size == 0 ){
+            cout<<"Empty";
+        }
+        arr[0] = arr[size -1];
+        size --;
+
+        int i = 0;
+        while(true){
+            int left = 2*i + 1;
+            int right = 2*i +2;
+            int target = i;
+
+            if(left < size && compare(arr[target], arr[left])){
+                target = left;
+            }
+            if(right < size && compare(arr[target], arr[right])){
+                target = right;
+            }
+            if(target != i){
+                swap(arr[i], arr[target]);
+                target = i;
+            }
+            else break;
+        }
+        
+
+    }
+
+}
